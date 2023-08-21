@@ -1,2 +1,2 @@
 # Arduino-Waterbuffer
-The upgraded Watter-buffer project
+The upgraded Water-buffer project
