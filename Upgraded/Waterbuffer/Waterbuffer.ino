@@ -41,7 +41,10 @@ te bepalen. Dat moet goed gebeuren, want het systeem werkt als volgt:
 int lastDistance = -1;
 const int firstDistancesLenght = 50;
 int firstDistances[firstDistancesLenght] = {};
-int firstDistancesPlace = 0;
+//Met 'firstDistanceIndex' bedoel bij welk item de array 'is'
+int firstDistancesIndex = 0;
+
+//Als er meer dan zoveel keer achter elkaar een foute afstand word gemeten, restart dan, deze variable checkt dat
 int badDistance = 0;
 
 //dsSerial; ds van distance - sensor
@@ -58,6 +61,9 @@ void setup() {
   Serial.begin(115200);
   dsSerial.begin(9600);
 }
+
+//Ik heb hier 1 functie voor het laten zien van de tekst, het buzzer geluid, of het lampje, omdat dit makkelijker is, dan hoeft u niet iedere keer opnieuw
+//alle code voor het lichte te typen
 
 void LcdWriteTop(String text, bool greenLedOn, bool orangeLedOn, bool redLedOn, bool buzzerOn, bool flashLight)
 {
@@ -94,7 +100,7 @@ void LcdWriteTop(String text, bool greenLedOn, bool orangeLedOn, bool redLedOn, 
 bool DistanceCheck(int distance, int firstDistances[])
 {
   //Die onderstaande 11 is omgerekend iets meer dan 2%
-  if(firstDistancesPlace > firstDistancesLenght - 1 && (distance < 0 || lastDistance - distance > 11 ||  - distance < -11))
+  if(firstDistancesIndex > firstDistancesLenght - 1 && (distance < 0 || lastDistance - distance > 11 ||  - distance < -11))
   {
     return false;
   }else
@@ -105,11 +111,12 @@ bool DistanceCheck(int distance, int firstDistances[])
     int remove_items = 0.1 * firstDistancesLenght; //10% (10% = 0.1) van 50 is 5, dat betekend 5 items gaan aan allebij de kanten weg;
     int finalDistancesLenght = firstDistancesLenght - remove_items * 2; // = 40 in ons geval
     int finalDistances[finalDistancesLenght];
-    int finelDistancesPlace = 0;
+    int finelDistancesIndex = 0;
 
+    //Dit haalt de eerste en laatste 'remove_items' weg (dus 5 bij ons). Die zet hij in een nieuwe array: 'finalDistances'.
     for(int i = remove_items; i < firstDistancesLenght - remove_items; i++)
     {
-      finalDistances[finelDistancesPlace++] = sortedDistances[i];  
+      finalDistances[finelDistancesIndex++] = sortedDistances[i];  
     }
 
     for(int i = 0; i < finalDistancesLenght; i++)
@@ -165,7 +172,7 @@ void loop() {
           lcd.print(distance);
           lcd.print ("mm");
 
-          if(firstDistancesPlace > 49)
+          if(firstDistancesIndex > 50)
           {
             //LcdWriteTop heeft 5 variables nodig: 'text, moet de groene led aan, moet de oranje led aan, moet de rode led aan, moet hij piepen, moet het licht knipperen'
 
@@ -191,11 +198,12 @@ void loop() {
             }
 
             lastDistance = distance;
+            badDistance = 0;
           }else
           {
-            LcdWriteTop(" loading... ", true, false, false, false, true);
-            firstDistances[firstDistancesPlace] = distance;
-            firstDistancesPlace ++;
+            LcdWriteTop("loading: " + firstDistancesIndex, true, false, false, false, true);
+            firstDistances[firstDistancesIndex] = distance;
+            firstDistancesIndex ++;
           }
         }else
         {
