@@ -148,7 +148,7 @@ void loop() {
       {
         distance = ((data_buffer[1]<<8)+data_buffer[2]);
         
-        //Als de DistanceCheck 'true' returned, ga dan door, anders: do niets
+        //Als de DistanceCheck 'true' returned, ga dan door
         if(DistanceCheck(distance, firstDistances))
         {
           Serial.print("Distance: ");
@@ -212,7 +212,7 @@ void loop() {
             badDistance ++;
           }else
           {
-            LcdWriteTop("please restart", true, false, false, false, true);
+            LcdWriteTop("please restart", false, false, true, false, true);
           }
         }
       } 
