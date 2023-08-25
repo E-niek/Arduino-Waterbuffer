@@ -4,6 +4,7 @@ public class Program
 {
     static void Main(string[] args)
     {
+        Test();
         Random rnd = new();
         int lastNum = 80;
         int num = 0;
@@ -36,6 +37,20 @@ public class Program
 
             Console.WriteLine($"{num}%");
             Thread.Sleep(500);
+        }
+
+        static void Test()
+        {
+            int firstDistancesIndex = 11;
+            int firstDistancesLenght = 10;
+            int lastDistance = 85;
+            int distance = 73;
+            if(firstDistancesIndex > firstDistancesLenght && (distance < 0 || lastDistance - distance > 11 ||  lastDistance - distance < -11))
+            {
+                Console.WriteLine("TRUE");
+            }else{
+                Console.WriteLine("FLAP");
+            }
         }
     }
 }
