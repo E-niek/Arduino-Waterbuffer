@@ -100,7 +100,7 @@ void LcdWriteTop(String text, bool greenLedOn, bool orangeLedOn, bool redLedOn, 
 bool DistanceCheck(int distance, int firstDistances[])
 {
   //Die onderstaande 11 is omgerekend iets meer dan 2%
-  if(firstDistancesIndex > firstDistancesLenght - 1 && (distance < 0 || lastDistance - distance > 11 ||  - distance < -11))
+  if(firstDistancesIndex > firstDistancesLenght && (distance < 0 || lastDistance - distance > 11 || lastDistance - distance < -11))
   {
     return false;
   }else
@@ -172,7 +172,7 @@ void loop() {
           lcd.print(distance);
           lcd.print ("mm");
 
-          if(firstDistancesIndex > 50)
+          if(firstDistancesIndex > firstDistancesLenght)
           {
             //LcdWriteTop heeft 5 variables nodig: 'text, moet de groene led aan, moet de oranje led aan, moet de rode led aan, moet hij piepen, moet het licht knipperen'
 
