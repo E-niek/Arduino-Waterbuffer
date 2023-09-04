@@ -4,6 +4,8 @@ public class Program
 {
     static void Main(string[] args)
     {
+        int knor = -1;
+        Console.WriteLine(knor++);
         Test();
         Random rnd = new();
         int lastNum = 80;
