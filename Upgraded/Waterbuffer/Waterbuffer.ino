@@ -100,14 +100,16 @@ void LcdWriteTop(String text, bool greenLedOn, bool orangeLedOn, bool redLedOn, 
 bool DistanceCheck(int distance, int firstDistances[])
 {
   //Die onderstaande 11 is omgerekend iets meer dan 2%
-  if(firstDistancesIndex > firstDistancesLenght && (distance < 0 || lastDistance - distance > 11 || lastDistance - distance < -11))
+  // Als firstDistancesIndex gelijk is aan -1, betekend dat hij de eerste lastDistance heeft berekend, en dat het programma nu gewoon draait
+  if(firstDistancesIndex == -1 && (distance < 0 || lastDistance - distance > 11 || lastDistance - distance < -11))
   {
+    Serial.println("DistanceCheck(): FALSE");
     return false;
-  }else
+  }else if(firstDistancesIndex > firstDistancesLenght)
   {
     int num;
-    int sortedDistances[firstDistancesLenght] = {firstDistances};
     sortArray(firstDistances, firstDistancesLenght);
+
     int remove_items = 0.1 * firstDistancesLenght; //10% (10% = 0.1) van 50 is 5, dat betekend 5 items gaan aan allebij de kanten weg;
     int finalDistancesLenght = firstDistancesLenght - remove_items * 2; // = 40 in ons geval
     int finalDistances[finalDistancesLenght];
@@ -116,18 +118,24 @@ bool DistanceCheck(int distance, int firstDistances[])
     //Dit haalt de eerste en laatste 'remove_items' weg (dus 5 bij ons). Die zet hij in een nieuwe array: 'finalDistances'.
     for(int i = remove_items; i < firstDistancesLenght - remove_items; i++)
     {
-      finalDistances[finelDistancesIndex++] = sortedDistances[i];  
+      finalDistances[finelDistancesIndex++] = firstDistances[i];
     }
 
     for(int i = 0; i < finalDistancesLenght; i++)
     {
       num += finalDistances[i];
+      Serial.print("Num: ");
+      Serial.println(num);
     }
 
     lastDistance = num / finalDistancesLenght;
-    
+    firstDistancesIndex = -1;
+
+    Serial.print("LastDistance: ");
+    Serial.println(lastDistance);
   }
 
+  Serial.println("DistanceCheck(): TRUE");
   return true;
 }
 
@@ -138,12 +146,12 @@ void loop() {
     if(dsSerial.read()==0xff)
     {
       data_buffer[0]=0xff;
-      for(int i = 1; i<4; i++)
+      for(int i = 1; i < 4; i++)
       {
         data_buffer[i] = dsSerial.read();
       }
 
-      CS=data_buffer[0]+data_buffer[1]+data_buffer[2];
+      CS=data_buffer[0] + data_buffer[1] + data_buffer[2];
       if(data_buffer[3] == CS)
       {
         distance = ((data_buffer[1]<<8)+data_buffer[2]);
@@ -180,21 +188,25 @@ void loop() {
             if(distance < Badhoogte - Droogloophoogte & distance > Badhoogte - Overloophoogte)
             {
               LcdWriteTop("     ok!    ", true, false, false, false, false);
+              Serial.println("Status: OK!");
             }
             //Droogloopcheck --> oranje knipperen
             else if(distance > (Badhoogte - Droogloophoogte))
             {
               LcdWriteTop(" droogloop! ", false, true, false, false, true);
+              Serial.println("Status: Droogloop!");
             }
             //Bad loopt over in de overloop -> oranje
             else if(distance < Badhoogte - Overloophoogte & distance > Badhoogte - Alarmhoogte)
             {
               LcdWriteTop("  overloop  ", false, true, false, false, false);
+              Serial.println("Status: Overloop!");
             }
             //Bad loopt over over de overloop -> rood knipperen
             else if(distance < Badhoogte - Alarmhoogte)
             {
               LcdWriteTop("    alarm   ", false, false, true, true, true);
+              Serial.println("Status: ALARM!!!!!!!");
             }
 
             lastDistance = distance;
@@ -202,6 +214,7 @@ void loop() {
           }else
           {
             LcdWriteTop("loading: " + firstDistancesIndex, true, false, false, false, true);
+            Serial.println("Status: Loading...");
             firstDistances[firstDistancesIndex] = distance;
             firstDistancesIndex ++;
           }
